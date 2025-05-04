@@ -1,38 +1,58 @@
+
+import lv.acodemy.page_object.InventoryPage;
+import lv.acodemy.page_object.LoginPage;
 import org.assertj.core.api.Assertions;
 import org.openqa.selenium.By;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 public class SauceDemoTest {
+
     ChromeDriver driver;
+    LoginPage loginPage;
+    InventoryPage inventoryPage;
 
     @BeforeMethod
     public void beforeTest() {
         driver = new ChromeDriver();
-        driver = new ChromeDriver();
         driver.get("https://saucedemo.com");
+
         driver.findElement(By.id("user-name")).sendKeys("standard_user");
-        driver.findElement(By.id("password")).sendKeys("secret_sauce");
+        driver.findElement(By.name("password")).sendKeys("secret_sauce");
         driver.findElement(By.xpath("//input[@data-test='login-button']")).click();
-
-
+        loginPage = new LoginPage(driver);
+        inventoryPage = new InventoryPage(driver);
     }
 
     @Test
     public void verifyLoggedInTest() {
         String productsText = driver.findElement(By.className("title")).getText();
-        assertThat(productsText).isEqualTo("Products");
-        driver.close();
-        driver.quit();
+        Assertions.assertThat(productsText)
+                .withFailMessage("Are u lalka? Expected title to be 'Products' but was '%s'", productsText)
+                .isNotNull()
+                .isNotEmpty()
+                .startsWith("Prod")
+                .endsWith("ucts")
+                .isEqualTo("Products");
     }
-    @AfterMethod()
-    public void tearDown() {
+
+        @Test
+        public void logInTest () {
+            loginPage.authorize("standard_user", "secret_sauce");
+        }
+
+        @Test
+        public void addItemToTheCart () {
+            loginPage.authorize("standard_user", "secret_sauce");
+            inventoryPage.addItemToCartByName("Onesie");
+        }
+
+        @AfterMethod()
+        public void tearDown () {
+            driver.close();
+        }
 
     }
-}
 
